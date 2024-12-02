@@ -36,6 +36,16 @@ func ArrayLast[K comparable](arr []K) K {
 	return arr[len(arr)-1]
 }
 
+func ArrayRemoveIndex[K comparable](arr []K, index int) []K {
+	if index == -1 {
+		return arr
+	} else if index == len(arr)-1 {
+		return arr[:len(arr)-1]
+	} else {
+		return append(arr[:index], arr[index+1:]...)
+	}
+}
+
 func ArrayRemoveItem[K comparable](arr []K, value K) []K {
 	index := ArrayIndexOf(arr, value)
 	if index == -1 {
