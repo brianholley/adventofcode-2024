@@ -1,5 +1,9 @@
 package lib
 
+import (
+	"sort"
+)
+
 func ArrayMax(arr []int) int {
 	max := arr[0]
 	for i := 1; i < len(arr); i++ {
@@ -60,4 +64,16 @@ func ArrayCopy[K comparable](arr []K) []K {
 	c := make([]K, len(arr))
 	copy(c, arr)
 	return c
+}
+
+// Should be able to use [K Ordered] constraint here
+func ArraySortAscending(arr []int) {
+	sort.Slice(arr, func(i, j int) bool {
+		return arr[i] < arr[j]
+	})
+}
+func ArraySortDescending(arr []int) {
+	sort.Slice(arr, func(i, j int) bool {
+		return arr[i] > arr[j]
+	})
 }
