@@ -64,9 +64,9 @@ func Create2dArray[K comparable](rows int, cols int, defaultValue K) [][]K {
 	return arr
 }
 
-func ParseStringOfIntsSpaceDelimited(str string) []int {
+func ParseStringOfIntsDelimited(str string, delimiter string) []int {
 	numbers := []int{}
-	s := strings.Split(str, " ")
+	s := strings.Split(str, delimiter)
 	for _, v := range s {
 		if len(v) > 0 {
 			n, _ := strconv.Atoi(v)
@@ -74,4 +74,8 @@ func ParseStringOfIntsSpaceDelimited(str string) []int {
 		}
 	}
 	return numbers
+}
+
+func ParseStringOfIntsSpaceDelimited(str string) []int {
+	return ParseStringOfIntsDelimited(str, " ")
 }
