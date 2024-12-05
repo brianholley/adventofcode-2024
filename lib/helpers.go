@@ -53,10 +53,10 @@ func Read2dArray(scanner *bufio.Scanner, spaceDelimited bool) [][]int {
 	return array
 }
 
-func Create2dArray(rows int, cols int, defaultValue int) [][]int {
-	arr := make([][]int, rows)
+func Create2dArray[K comparable](rows int, cols int, defaultValue K) [][]K {
+	arr := make([][]K, rows)
 	for i := 0; i < rows; i++ {
-		arr[i] = make([]int, cols)
+		arr[i] = make([]K, cols)
 		for j := 0; j < cols; j++ {
 			arr[i][j] = defaultValue
 		}
