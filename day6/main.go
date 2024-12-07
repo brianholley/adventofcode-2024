@@ -51,58 +51,7 @@ func readMap(stdin *bufio.Scanner) ([][]int, Guard) {
 	return areaMap, guard
 }
 
-func part1(stdin *bufio.Scanner) string {
-	result := 0
-
-	areaMap, guard := readMap(stdin)
-
-	mapWidth := len(areaMap)
-	mapHeight := len(areaMap[0])
-
-	for {
-		if guard.row < 0 || guard.row >= mapHeight || guard.col < 0 || guard.col >= mapWidth {
-			break
-		}
-		areaMap[guard.row][guard.col] |= guard.direction
-		if guard.direction == north {
-			if guard.row > 0 && areaMap[guard.row-1][guard.col] == obstacle {
-				guard.direction = east
-			} else {
-				guard.row--
-			}
-		} else if guard.direction == east {
-			if guard.col < mapWidth-1 && areaMap[guard.row][guard.col+1] == obstacle {
-				guard.direction = south
-			} else {
-				guard.col++
-			}
-		} else if guard.direction == south {
-			if guard.row < mapHeight-1 && areaMap[guard.row+1][guard.col] == obstacle {
-				guard.direction = west
-			} else {
-				guard.row++
-			}
-		} else if guard.direction == west {
-			if guard.col > 0 && areaMap[guard.row][guard.col-1] == obstacle {
-				guard.direction = north
-			} else {
-				guard.col--
-			}
-		}
-	}
-
-	for i := range areaMap {
-		for j := range areaMap[i] {
-			if areaMap[i][j] > 0 {
-				result++
-			}
-		}
-	}
-	return fmt.Sprint(result)
-}
-
-// Brute force solution :(
-func encountersLoop(areaMap [][]int, guard Guard) bool {
+func runGuardCheckForLoops(guard Guard, areaMap [][]int) bool {
 	mapWidth := len(areaMap)
 	mapHeight := len(areaMap[0])
 
@@ -142,22 +91,42 @@ func encountersLoop(areaMap [][]int, guard Guard) bool {
 	}
 }
 
+func part1(stdin *bufio.Scanner) string {
+	result := 0
+
+	areaMap, guard := readMap(stdin)
+	runGuardCheckForLoops(guard, areaMap)
+
+	for i := range areaMap {
+		for j := range areaMap[i] {
+			if areaMap[i][j] > 0 {
+				result++
+			}
+		}
+	}
+	return fmt.Sprint(result)
+}
+
 func part2(stdin *bufio.Scanner) string {
 	result := 0
 
 	originalMap, originalGuard := readMap(stdin)
+
+	firstPassMap := lib.Array2dCopy(originalMap)
+	firstPassGuard := originalGuard
+	runGuardCheckForLoops(firstPassGuard, firstPassMap)
 
 	objects := []cell{}
 
 	for i := range originalMap {
 		for j := range originalMap[i] {
 
-			if originalMap[i][j] == 0 && (i != originalGuard.row || j != originalGuard.col) {
+			if firstPassMap[i][j] > 0 && (i != originalGuard.row || j != originalGuard.col) {
 				areaMap := lib.Array2dCopy(originalMap)
 				guard := originalGuard
 
 				areaMap[i][j] = obstacle
-				if encountersLoop(areaMap, guard) {
+				if runGuardCheckForLoops(guard, areaMap) {
 					objects = append(objects, cell{row: i, col: j})
 				}
 			}
