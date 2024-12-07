@@ -76,6 +76,15 @@ func ArrayCopy[K comparable](arr []K) []K {
 	return c
 }
 
+func Array2dCopy[K comparable](arr [][]K) [][]K {
+	c := make([][]K, len(arr))
+	for i := range arr {
+		c[i] = make([]K, len(arr[i]))
+		copy(c[i], arr[i])
+	}
+	return c
+}
+
 // Should be able to use [K Ordered] constraint here
 func ArraySortAscending(arr []int) {
 	sort.Slice(arr, func(i, j int) bool {
