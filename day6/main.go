@@ -12,10 +12,10 @@ func main() {
 	fmt.Println(result)
 }
 
-type guardPos struct {
+type Guard struct {
 	row       int
 	col       int
-	direction string
+	direction int
 }
 
 type cell struct {
@@ -23,19 +23,24 @@ type cell struct {
 	col int
 }
 
-const north = "N"
-const east = "E"
-const south = "S"
-const west = "W"
+const obstacle = -1
+const north = 1
+const east = 2
+const south = 4
+const west = 8
 
-func part1(stdin *bufio.Scanner) string {
-	result := 0
-
-	areaMap := [][]string{}
-	guard := guardPos{}
+func readMap(stdin *bufio.Scanner) ([][]int, Guard) {
+	areaMap := [][]int{}
+	guard := Guard{}
 	for i := 0; stdin.Scan(); i++ {
 		line := stdin.Text()
-		areaMap = append(areaMap, strings.Split(line, ""))
+		areaMap = append(areaMap, make([]int, len(line)))
+
+		for j := range line {
+			if line[j] == '#' {
+				areaMap[i][j] = obstacle
+			}
+		}
 
 		if strings.Contains(line, "^") {
 			guard.row = i
@@ -43,6 +48,13 @@ func part1(stdin *bufio.Scanner) string {
 			guard.direction = north
 		}
 	}
+	return areaMap, guard
+}
+
+func part1(stdin *bufio.Scanner) string {
+	result := 0
+
+	areaMap, guard := readMap(stdin)
 
 	mapWidth := len(areaMap)
 	mapHeight := len(areaMap[0])
@@ -51,27 +63,27 @@ func part1(stdin *bufio.Scanner) string {
 		if guard.row < 0 || guard.row >= mapHeight || guard.col < 0 || guard.col >= mapWidth {
 			break
 		}
-		areaMap[guard.row][guard.col] = "x"
+		areaMap[guard.row][guard.col] |= guard.direction
 		if guard.direction == north {
-			if guard.row > 0 && areaMap[guard.row-1][guard.col] == "#" {
+			if guard.row > 0 && areaMap[guard.row-1][guard.col] == obstacle {
 				guard.direction = east
 			} else {
 				guard.row--
 			}
 		} else if guard.direction == east {
-			if guard.col < mapWidth-1 && areaMap[guard.row][guard.col+1] == "#" {
+			if guard.col < mapWidth-1 && areaMap[guard.row][guard.col+1] == obstacle {
 				guard.direction = south
 			} else {
 				guard.col++
 			}
 		} else if guard.direction == south {
-			if guard.row < mapHeight-1 && areaMap[guard.row+1][guard.col] == "#" {
+			if guard.row < mapHeight-1 && areaMap[guard.row+1][guard.col] == obstacle {
 				guard.direction = west
 			} else {
 				guard.row++
 			}
 		} else if guard.direction == west {
-			if guard.col > 0 && areaMap[guard.row][guard.col-1] == "#" {
+			if guard.col > 0 && areaMap[guard.row][guard.col-1] == obstacle {
 				guard.direction = north
 			} else {
 				guard.col--
@@ -81,7 +93,7 @@ func part1(stdin *bufio.Scanner) string {
 
 	for i := range areaMap {
 		for j := range areaMap[i] {
-			if areaMap[i][j] == "x" {
+			if areaMap[i][j] > 0 {
 				result++
 			}
 		}
@@ -90,7 +102,7 @@ func part1(stdin *bufio.Scanner) string {
 }
 
 // Brute force solution :(
-func encountersLoop(areaMap [][]string, guard guardPos) bool {
+func encountersLoop(areaMap [][]int, guard Guard) bool {
 	mapWidth := len(areaMap)
 	mapHeight := len(areaMap[0])
 
@@ -98,30 +110,30 @@ func encountersLoop(areaMap [][]string, guard guardPos) bool {
 		if guard.row < 0 || guard.row >= mapHeight || guard.col < 0 || guard.col >= mapWidth {
 			return false
 		}
-		if strings.Contains(areaMap[guard.row][guard.col], guard.direction) {
+		if areaMap[guard.row][guard.col]&guard.direction == guard.direction {
 			return true
 		}
-		areaMap[guard.row][guard.col] = areaMap[guard.row][guard.col] + guard.direction
+		areaMap[guard.row][guard.col] |= guard.direction
 		if guard.direction == north {
-			if guard.row > 0 && areaMap[guard.row-1][guard.col] == "#" {
+			if guard.row > 0 && areaMap[guard.row-1][guard.col] == obstacle {
 				guard.direction = east
 			} else {
 				guard.row--
 			}
 		} else if guard.direction == east {
-			if guard.col < mapWidth-1 && areaMap[guard.row][guard.col+1] == "#" {
+			if guard.col < mapWidth-1 && areaMap[guard.row][guard.col+1] == obstacle {
 				guard.direction = south
 			} else {
 				guard.col++
 			}
 		} else if guard.direction == south {
-			if guard.row < mapHeight-1 && areaMap[guard.row+1][guard.col] == "#" {
+			if guard.row < mapHeight-1 && areaMap[guard.row+1][guard.col] == obstacle {
 				guard.direction = west
 			} else {
 				guard.row++
 			}
 		} else if guard.direction == west {
-			if guard.col > 0 && areaMap[guard.row][guard.col-1] == "#" {
+			if guard.col > 0 && areaMap[guard.row][guard.col-1] == obstacle {
 				guard.direction = north
 			} else {
 				guard.col--
@@ -133,29 +145,18 @@ func encountersLoop(areaMap [][]string, guard guardPos) bool {
 func part2(stdin *bufio.Scanner) string {
 	result := 0
 
-	originalMap := [][]string{}
-	originalGuard := guardPos{}
-	for i := 0; stdin.Scan(); i++ {
-		line := stdin.Text()
-		originalMap = append(originalMap, strings.Split(line, ""))
-
-		if strings.Contains(line, "^") {
-			originalGuard.row = i
-			originalGuard.col = strings.Index(line, "^")
-			originalGuard.direction = north
-		}
-	}
+	originalMap, originalGuard := readMap(stdin)
 
 	objects := []cell{}
 
 	for i := range originalMap {
 		for j := range originalMap[i] {
 
-			if originalMap[i][j] == "." {
+			if originalMap[i][j] == 0 && (i != originalGuard.row || j != originalGuard.col) {
 				areaMap := lib.Array2dCopy(originalMap)
 				guard := originalGuard
 
-				areaMap[i][j] = "#"
+				areaMap[i][j] = obstacle
 				if encountersLoop(areaMap, guard) {
 					objects = append(objects, cell{row: i, col: j})
 				}
