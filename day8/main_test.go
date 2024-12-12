@@ -8,8 +8,8 @@ import (
 
 const part1Expected = "14"
 const part1Answer = "301"
-const part2Expected = "0"
-const part2Answer = "0"
+const part2Expected = "34"
+const part2Answer = "1019"
 
 func loadfile(filename string) *bufio.Scanner {
 	file, _ := os.Open(filename)
