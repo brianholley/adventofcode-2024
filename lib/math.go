@@ -22,3 +22,14 @@ func Abs(i int) int {
 	}
 	return i
 }
+
+func Gcd(a int, b int) int {
+	for b > 0 {
+		a, b = b, a%b
+	}
+	return a
+}
+
+func Lcm(a int, b int) int {
+	return (a * b) / Gcd(a, b)
+}
