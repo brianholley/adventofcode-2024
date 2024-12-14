@@ -90,17 +90,6 @@ func part1(stdin *bufio.Scanner) string {
 	return fmt.Sprint(result)
 }
 
-func gcd(a int, b int) int {
-	for b > 0 {
-		a, b = b, a%b
-	}
-	return a
-}
-
-func lcm(a int, b int) int {
-	return (a * b) / gcd(a, b)
-}
-
 func optimalButtonPresses(machine Machine) (bool, int, int) {
 	// Solving the systems of equations:
 	// 1.
