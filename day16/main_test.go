@@ -8,7 +8,7 @@ import (
 
 var part1Samples = []string{"7036", "11048"}
 
-const part1Answer = "0"
+const part1Answer = "90440"
 
 var part2Samples = []string{"0"}
 
